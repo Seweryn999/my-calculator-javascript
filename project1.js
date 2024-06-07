@@ -1,69 +1,65 @@
-const prompt = require("prompt-sync")();
-
-const firstValue = () => {
-  const firstNumber = prompt("Enter first number: ");
-  const parseFirstNumber = parseFloat(firstNumber);
-
-  if (isNaN(parseFirstNumber)) {
-    console.log("Given value is not a number, try again: ");
-    return firstValue();
-  }
-  return parseFirstNumber;
-};
-
-const mathematicalSymbol = () => {
-  const mathSymbol = prompt("Enter a math symbol out of (+, -, *, /):  ");
-
-  if (
-    mathSymbol != "*" &&
-    mathSymbol != "+" &&
-    mathSymbol != "-" &&
-    mathSymbol != "/"
-  ) {
-    console.log("Given value is not one of (+, -, *, /) symbols.");
-    return mathematicalSymbol();
-  }
-  return mathSymbol;
-};
-
-const secondValue = () => {
-  const secondNumber = prompt("Enter second number: ");
-  const parseSecondNumber = parseFloat(secondNumber);
-
-  if (isNaN(parseSecondNumber)) {
-    console.log("Given value is not a number, try again: ");
-    return secondValue();
-  }
-  return parseSecondNumber;
-};
-
 const operations = {
   "+": (a, b) => a + b,
   "-": (a, b) => a - b,
   "*": (a, b) => a * b,
   "/": (a, b) => {
     if (b === 0) {
-      console.log("Cannot divide by zero");
-      return;
+      alert("Cannot divide by zero");
+      return null;
     }
     return a / b;
   },
 };
 
-const calculateOutcome = (firstNumber, mathSymbol, secondNumber) => {
-  if (operations[mathSymbol]) {
-    return operations[mathSymbol](firstNumber, secondNumber);
-  } else {
-    console.log("Invalid operation");
-    return NaN;
+function appendToDisplay(value) {
+  const display = document.getElementById("display");
+  display.value += value;
+}
+
+function clearDisplay() {
+  const display = document.getElementById("display");
+  display.value = "";
+}
+
+function calculate() {
+  const display = document.getElementById("display");
+  const expression = display.value;
+
+  try {
+    const result = evaluateExpression(expression);
+    if (result !== null) {
+      display.value = result;
+    }
+  } catch (error) {
+    alert("Invalid expression");
+    clearDisplay();
   }
-};
+}
 
-const firstNumber = firstValue();
-const mathSymbol = mathematicalSymbol();
-const secondNumber = secondValue();
+function evaluateExpression(expression) {
+  const operators = Object.keys(operations);
+  let operatorFound = null;
 
-const result = calculateOutcome(firstNumber, mathSymbol, secondNumber);
-if (!isNaN(result)) {
-  console.log("Result:", result);
+  for (let operator of operators) {
+    if (expression.includes(operator)) {
+      operatorFound = operator;
+      break;
+    }
+  }
+
+  if (operatorFound) {
+    const [firstPart, secondPart] = expression
+      .split(operatorFound)
+      .map((part) => part.trim());
+    const firstNumber = parseFloat(firstPart);
+    const secondNumber = parseFloat(secondPart);
+
+    if (isNaN(firstNumber) || isNaN(secondNumber)) {
+      throw new Error("Invalid number");
+    }
+
+    return operations[operatorFound](firstNumber, secondNumber);
+  } else {
+    throw new Error("Operator not found");
+  }
 }
